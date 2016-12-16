@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop.xsd ">
+	<!--
+		读取配置文件 <bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations"> <list>
+		<value>classpath:jdbc.properties</value> </list> </property> </bean>
+	-->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	<!-- c3p0连接池 -->
+	<!--
+		<bean id="dataSource"
+		class="com.mchange.v2.c3p0.ComboPooledDataSource"> <property
+		name="driverClass" value="${driverClass}" /> <property name="jdbcUrl"
+		value="${jdbcUrl}" /> <property name="user" value="${user}" />
+		<property name="password" value="${password}"/> 连接池中保留的最大连接数。默认值: 15
+		<property name="maxPoolSize" value="${maxPoolSize}"/>
+		连接池中保留的最小连接数，默认为：3 <property name="minPoolSize"
+		value="${minPoolSize}"/>
+		初始化连接池中的连接数，取值应在minPoolSize与maxPoolSize之间，默认为3 <property
+		name="initialPoolSize" value="${initialPoolSize}"/>
+		最大空闲时间，60秒内未使用则连接被丢弃。若为0则永不丢弃。默认值: 0 <property name="maxIdleTime"
+		value="${maxIdleTime}"/> </bean>
+	-->
+
+	<!-- druid连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 基本属性 url、user、password -->
+		<property name="url" value="${jdbcUrl}" />
+		<property name="username" value="${user}" />
+		<property name="password" value="${password}" />
+		<property name="connectionProperties" value="${driverClass}" />
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${initialPoolSize}" />
+		<property name="minIdle" value="${minPoolSize}" />
+		<property name="maxActive" value="${maxPoolSize}" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="60000" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		<property name="validationQuery" value="SELECT 'x'" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<property name="poolPreparedStatements" value="true" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="20" />
+
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="stat" />
+	</bean>
+
+	<!--
+		1. 数据源 : DriverManagerDataSource <bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/mybatis" />
+		<property name="username" value="root" /> <property name="password"
+		value="123456" /> </bean>
+	-->
+
+	<!--
+		2. mybatis的SqlSession的工厂: SqlSessionFactoryBean dataSource:引用数据源
+
+		MyBatis定义数据源,同意加载配置
+	-->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation" value="classpath:config/mybatis-config.xml" />
+		<property name="mapperLocations" value="classpath:com/tgb/mapper/*.xml" />
+	</bean>
+
+	<!--
+		3. mybatis自动扫描加载Sql映射文件/接口 : MapperScannerConfigurer sqlSessionFactory
+
+		basePackage:指定sql映射文件/接口所在的包（自动扫描）
+	-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.tgb.mapper"></property>
+		<!--
+			<property name="sqlSessionFactory"
+			ref="sqlSessionFactory"></property>
+		-->
+	</bean>
+
+	<!--
+		4. 事务管理 : DataSourceTransactionManager dataSource:引用上面定义的数据源
+	-->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<tx:advice id="tx" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="find*" propagation="SUPPORTS" />
+		</tx:attributes>
+	</tx:advice>
+	<aop:config>
+		<aop:pointcut id="pointcut" expression="execution(* com.tgb.service.*.*(..))" />
+		<aop:advisor advice-ref="tx" pointcut-ref="pointcut" />
+	</aop:config>
+
+	<!--
+		5. 使用声明式事务 transaction-manager：引用上面定义的事务管理器 <tx:annotation-driven
+		transaction-manager="txManager" />
+	-->
+
+</beans>
