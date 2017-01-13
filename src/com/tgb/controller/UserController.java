@@ -86,8 +86,12 @@ public class UserController {
 		user.setUserName(userName);
 		user.setPassword(password);
 		user.setEmail(email);
-	    new Thread(new SendMail(user)).start();
-		userService.save(user);
+		try {
+			new Thread(new SendMail(user)).start();
+			userService.save(user);
+		} catch (Exception e) {
+			logger.error(e);
+		}
 		return "redirect:/user/getAllUser";
 	}
 	
