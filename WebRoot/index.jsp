@@ -8,7 +8,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <html>
   <head>
     <base href="<%=basePath%>">
-    <jsp:include page='${basePath}/baseJsp/baseJsp.jsp'/>
+    <jsp:include page=<%=basePath%>'baseJsp/baseJsp.jsp'/>
     <!--  <script type="text/javascript" src="${basePath}js/jquery.min.js"></script>
     <script type="text/javascript" src="${basePath}js/jquery.easyui.min.js"></script>
     <script type="text/javascript" src="${basePath}js/easyui-lang-zh_CN.js"></script>
@@ -61,7 +61,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
             <div class="form-group">
                 <label for="email" class="col-sm-2 control-label">邮箱</label>
                 <div class="col-sm-3">
-                    <input type="text" class="form-control" id="email" name="email"
+                    <input type="text" class="form-control" id="email" name="email" 
                            placeholder="注册需填入邮箱">
                 </div>
             </div>
