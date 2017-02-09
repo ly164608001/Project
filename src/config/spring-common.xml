@@ -12,6 +12,12 @@
 		http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
 		http://www.springframework.org/schema/aop 
         http://www.springframework.org/schema/aop/spring-aop.xsd ">
+     <!-- spring的context是父子容器，由ServletContextListener 加载spring配置文件产生的是父容器，
+		加载配置文件产生的是子容器，子容器对Controller进行扫描装配时装配了@Service注解的实例 (@Controller 实例依赖@Service实例)，
+		而该实例理应由父容器进行初始化以保证事务的增强处理，所以此时得到的将是原样的Service（没有经过事务加强处理，故而没有事务处理能力。 -->
+     <context:component-scan base-package="com.tgb">
+     	<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+     </context:component-scan>
 	<!--
 		读取配置文件 <bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">

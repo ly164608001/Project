@@ -11,7 +11,9 @@
 
 
 	<!-- 注解扫描包 -->
-	<context:component-scan base-package="com.tgb" />
+	<context:component-scan base-package="com.tgb">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+	</context:component-scan>
 		<!-- 开启注解 -->
 	<mvc:annotation-driven>
 		<!-- 处理请求返回json字符串的中文乱码问题 -->
