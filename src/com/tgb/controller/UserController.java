@@ -3,25 +3,17 @@ package com.tgb.controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.mchange.v1.util.SetUtils;
-import com.sun.mail.iap.Response;
 import com.tgb.model.User;
 import com.tgb.service.UserService;
 import com.tgb.util.SendMail;
@@ -149,4 +141,27 @@ public class UserController {
 		}
 
 	}
+	
+	
+	
+	/**
+	 * 跳转到数据库信息页面
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/getDbInfo")
+	public String getDbInfo(HttpServletRequest request,RedirectAttributes attr){
+		String name = request.getParameter("userName");
+		String pwd = request.getParameter("password");
+		String password = userService.findByName(name);
+		if(password !=null && password.equals(pwd)){
+			request.setAttribute("userName", name);
+			return "DbInfo";
+		}else {
+			attr.addFlashAttribute("errorMsg", "用户名或者密码错误");
+			return "redirect:/user/index";
+		}
+	}
+	
+	
 }
