@@ -37,7 +37,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     				$.ajax({
     					url:"${basePath}userJson/createCode",
     					type:"POST",
-    					data:{jdbcType:$("#jdbcType").val(),jdbcUrl:$("#jdbcUrl").val(),user:$("#user").val(),password:$("#password").val()},
+    					data:{jdbcType:$("#jdbcType").val(),jdbcUrl:$("#jdbcUrl").val(),user:$("#user").val(),password:$("#password").val(),tableName:$("#tableName").val()},
     					dataType:"text",
     					success:function(data){
     						$("#button").attr("disabled",false);

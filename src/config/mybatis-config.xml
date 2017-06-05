@@ -15,5 +15,8 @@
 	<mappers>
 		<mapper resource="com/tgb/mapper/userMapper.xml"/>
 	</mappers>-->
+	<plugins>
+		<plugin interceptor="com.tgb.util.PageIntercept"></plugin>
+	</plugins>
 
 </configuration>  
