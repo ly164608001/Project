@@ -60,26 +60,44 @@ public class UserJsonController {
 		String jdbcUrl = request.getParameter("jdbcUrl");
 		String user = request.getParameter("user");
 		String password = request.getParameter("password");
+		String table = request.getParameter("tableName");
 		try {
 			Connection connection = JdbcUtil.getConnection(jdbcType,jdbcUrl,user,password);
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
-			ResultSet resultSet = JdbcUtil.getTables(databaseMetaData,user);
-			while (resultSet.next()) {
-				String tableName = resultSet.getString("TABLE_NAME");
-				ResultSet rs = databaseMetaData.getColumns(null,"%", tableName,"%");
+			if(table!=null && !"".equals(table)){
+				ResultSet rs = databaseMetaData.getColumns(null,"%", table,"%");
 				//生成model文件
-				GenerateUtil.generateModelFile(rs,tableName);
+				GenerateUtil.generateModelFile(rs,table);
 				//生成dao文件
-				GenerateUtil.generateDaoFile(tableName);
+				GenerateUtil.generateDaoFile(table);
 				//生成service文件
-				GenerateUtil.generateServiceFile(tableName);
+				GenerateUtil.generateServiceFile(table);
 				//生成serviceImpl文件
-				GenerateUtil.generateServiceImplFile(tableName);
+				GenerateUtil.generateServiceImplFile(table);
 				//生成controller文件
-				GenerateUtil.generateControllerFile(tableName);
+				GenerateUtil.generateControllerFile(table);
 				//生成mapper文件
-				rs = databaseMetaData.getColumns(null,"%", tableName,"%");
-				GenerateUtil.generateMapperFile(rs,tableName);
+				rs = databaseMetaData.getColumns(null,"%", table,"%");
+				GenerateUtil.generateMapperFile(rs,table);
+			}else{
+				ResultSet resultSet = JdbcUtil.getTables(databaseMetaData,user);
+				while (resultSet.next()) {
+					String tableName = resultSet.getString("TABLE_NAME");
+					ResultSet rs = databaseMetaData.getColumns(null,"%", tableName,"%");
+					//生成model文件
+					GenerateUtil.generateModelFile(rs,tableName);
+					//生成dao文件
+					GenerateUtil.generateDaoFile(tableName);
+					//生成service文件
+					GenerateUtil.generateServiceFile(tableName);
+					//生成serviceImpl文件
+					GenerateUtil.generateServiceImplFile(tableName);
+					//生成controller文件
+					GenerateUtil.generateControllerFile(tableName);
+					//生成mapper文件
+					rs = databaseMetaData.getColumns(null,"%", tableName,"%");
+					GenerateUtil.generateMapperFile(rs,tableName);
+				}
 			}
 		} catch (Exception e) {
 			return e.toString();
